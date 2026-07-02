@@ -1,9 +1,12 @@
 /**
  * Configuration options for the Woopy client.
+ * Either `token` or `apiKey` must be provided.
  */
 export interface WoopyConfig {
     /** Your secret API token from the Woopy dashboard */
-    token: string;
+    token?: string;
+    /** Alias for `token`, kept for backwards compatibility */
+    apiKey?: string;
     /** Optional custom API base URL (e.g., for staging or testing) */
     baseUrl?: string;
 }
@@ -49,4 +52,5 @@ declare class Woopy {
     alert(data: WoopyAlertData): Promise<WoopyResponse>;
 }
 
-export = Woopy;
+export { Woopy };
+export default Woopy;

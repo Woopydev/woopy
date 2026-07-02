@@ -25,11 +25,10 @@ yarn add @woopysdk/node
 Initialize the Woopy client and trigger your first alert.
 
 ```javascript
-// npm install woopy
-import { Woopy } from '@woopysdk/node'
+import Woopy from '@woopysdk/node'
 
 const woopy = new Woopy({
-  apiKey: process.env.WOOPY_API_KEY,
+  token: process.env.WOOPY_TOKEN,
 })
 
 // In your job / handler
@@ -38,13 +37,19 @@ async function processPayment(orderId) {
     await runPayment(orderId)
   } catch (error) {
     await woopy.alert({
-      title: "Error occurred",
-      description: error.message,
-      actions: ['restart_job', 'flush_cache'],
+      title: 'Payment worker crashed',
+      body: error.message,
+      actions: ['restart_worker', 'flush_cache'],
     })
     throw error
   }
 }
+```
+
+Using CommonJS? The same client is available via `require`:
+
+```javascript
+const Woopy = require('@woopysdk/node')
 ```
 
 ---
@@ -59,6 +64,7 @@ Creates a new Woopy client instance.
 | Property | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
 | `token` | `string` | **Yes** | Your secret API inbound token from the Woopy dashboard. |
+| `apiKey` | `string` | No | Alias for `token`, kept for backwards compatibility. |
 | `baseUrl` | `string` | No | Custom API endpoint (e.g., for staging or testing). |
 
 ---
@@ -87,12 +93,12 @@ This SDK is written with TypeScript in mind and includes built-in type definitio
 ```typescript
 import Woopy, { WoopyAlertData } from '@woopysdk/node';
 
-const woopy = new Woopy({ token: '...' });
+const woopy = new Woopy({ token: process.env.WOOPY_TOKEN });
 
 const alertData: WoopyAlertData = {
   title: "Critical Error",
   body: "Database connection lost.",
-  actions: ["restart-jobs", "flush-cash"]
+  actions: ["restart_worker", "flush_cache"]
 };
 
 await woopy.alert(alertData);
