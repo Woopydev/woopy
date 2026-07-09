@@ -6,7 +6,8 @@
   "files": [
     "index.js",
     "index.d.ts",
-    "webhook.js"
+    "webhook.js",
+    "CHANGELOG.md"
   ],
   "engines": {
     "node": ">=18"
