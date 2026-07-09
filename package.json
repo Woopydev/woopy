@@ -1,8 +1,16 @@
 {
   "name": "@woopysdk/node",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "main": "index.js",
   "types": "index.d.ts",
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "webhook.js"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "keywords": [
     "woopy",
     "notification",
@@ -17,7 +25,10 @@
   },
   "homepage": "https://github.com/teambear-piotrzaworski/woopy#readme",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test \"test/*.test.js\""
+  },
+  "devDependencies": {
+    "standardwebhooks": "^1.0.0"
   },
   "author": "Piotr Zaworski",
   "license": "ISC",

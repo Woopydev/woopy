@@ -1,3 +1,5 @@
+const { verifyWebhook, WoopyWebhookVerificationError } = require("./webhook");
+
 class Woopy {
     constructor(config = {}) {
         // `apiKey` is accepted as an alias for `token` for backwards
@@ -40,3 +42,9 @@ module.exports = Woopy;
 // `import { Woopy } from '@woopysdk/node'` in ESM.
 module.exports.Woopy = Woopy;
 module.exports.default = Woopy;
+
+// Webhook verification is a standalone function, not a client method: the code
+// receiving webhooks is usually a route handler that has no reason to hold an
+// API token, and the webhook secret is a different credential than the token.
+module.exports.verifyWebhook = verifyWebhook;
+module.exports.WoopyWebhookVerificationError = WoopyWebhookVerificationError;

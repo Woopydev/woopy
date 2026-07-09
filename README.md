@@ -54,6 +54,62 @@ const Woopy = require('@woopysdk/node')
 
 ---
 
+## Verifying Webhooks
+
+When you tap a Remote Action, Woopy sends a signed `POST` request to your webhook URL. Anyone who learns that URL can send a forged request to it, so verify the signature before you act on it.
+
+Woopy signs every request following the [Standard Webhooks](https://www.standardwebhooks.com/) specification. `verifyWebhook` checks the signature and the timestamp, and returns the parsed payload:
+
+```javascript
+import express from 'express'
+import { verifyWebhook, WoopyWebhookVerificationError } from '@woopysdk/node'
+
+const app = express()
+
+// The signature covers the exact bytes Woopy sent, so hand verifyWebhook the raw
+// body. A parsed-and-re-serialized body does not round-trip byte for byte.
+app.post(
+  '/webhooks/woopy',
+  express.raw({ type: 'application/json' }),
+  (req, res) => {
+    let payload
+    try {
+      payload = verifyWebhook(req.body, req.headers, process.env.WOOPY_WEBHOOK_SECRET)
+    } catch (error) {
+      if (error instanceof WoopyWebhookVerificationError) {
+        return res.status(401).json({ error: 'Invalid signature' })
+      }
+      throw error
+    }
+
+    // delivery_id is stable across retries - use it to make the action idempotent.
+    console.log(`Running "${payload.action_key}" (delivery ${payload.delivery_id})`)
+
+    res.json({ status: 'success' })
+  },
+)
+```
+
+Already using `express.json()` elsewhere? Keep the raw bytes alongside the parsed body:
+
+```javascript
+app.use(
+  express.json({
+    verify: (req, _res, buf) => {
+      req.rawBody = buf
+    },
+  }),
+)
+```
+
+`verifyWebhook` **throws** rather than returning `false`, so a forgotten `if` cannot let a forged request through. It rejects a request whose body was tampered with, whose signature was lifted from another delivery, or whose timestamp is more than 5 minutes away from now (replay protection).
+
+### Rotating the secret
+
+Rotate the webhook secret from the dashboard (**Rotate Webhook Secret**). For the next 24 hours Woopy signs every request with both the new and the previous secret, so your endpoint keeps working while you deploy the new value. After the window, only the new secret signs.
+
+---
+
 ## API Reference
 
 ### `new Woopy(config)`
@@ -81,8 +137,31 @@ Triggers an alert. Returns a `Promise<WoopyResponse>`.
 | `actions` | `string[]` | No | List of action keys for notification buttons (configured in web platform). |
 
 **`WoopyResponse` Object:**
-* `message`: `string` — Success message from the API.
-* `error`: `string` (optional) — Error details if the request failed.
+* `message`: `string` - Success message from the API.
+* `error`: `string` (optional) - Error details if the request failed.
+
+---
+
+### `verifyWebhook(rawBody, headers, secret, options?)`
+Verifies an incoming webhook and returns the parsed `WoopyWebhookPayload`. Throws `WoopyWebhookVerificationError` when the request is forged, tampered with, or replayed.
+
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `rawBody` | `string \| Buffer` | **Yes** | The raw, unparsed request body. Not the parsed object. |
+| `headers` | `object` | **Yes** | The incoming request headers. Any casing. |
+| `secret` | `string` | **Yes** | The application's webhook secret (`whsec_...`) from the dashboard. |
+| `options.toleranceSeconds` | `number` | No | How far the timestamp may drift from now. Defaults to `300`. |
+
+**`WoopyWebhookPayload` Object:**
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `delivery_id` | `string` | Unique id of this delivery. Use it as an idempotency key. |
+| `action_key` | `string` | The unique key of the triggered action. |
+| `title` | `string` | The action's title (its button label). |
+| `application_id` | `number` | ID of the application the action belongs to. |
+| `notification_id` | `number \| null` | ID of the alert the action was fired from, when applicable. |
+| `fired_at` | `string` | ISO 8601 timestamp of when the action was fired. |
 
 ---
 

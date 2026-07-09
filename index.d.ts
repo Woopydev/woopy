@@ -29,6 +29,62 @@ export interface WoopyAlertData {
 }
 
 /**
+ * The payload Woopy POSTs to your webhook endpoint when a Remote Action fires.
+ */
+export interface WoopyWebhookPayload {
+    /** Unique id of this delivery. Also sent as the `webhook-id` header. Use it as an idempotency key. */
+    delivery_id: string;
+    /** The unique key of the triggered action */
+    action_key: string;
+    /** The action's title (its button label) */
+    title: string;
+    /** ID of the application the action belongs to */
+    application_id: number;
+    /** ID of the notification the action was fired from, or null when fired outside an alert */
+    notification_id: number | null;
+    /** ISO 8601 timestamp of when the action was fired */
+    fired_at: string;
+}
+
+export type WoopyWebhookErrorCode =
+    | "missing_headers"
+    | "ambiguous_headers"
+    | "invalid_timestamp"
+    | "timestamp_out_of_tolerance"
+    | "no_matching_signature";
+
+/**
+ * Thrown when an incoming request is not a genuine, fresh Woopy webhook.
+ * Every instance means: reject the request.
+ */
+export declare class WoopyWebhookVerificationError extends Error {
+    name: "WoopyWebhookVerificationError";
+    code: WoopyWebhookErrorCode;
+}
+
+export interface VerifyWebhookOptions {
+    /** How far the webhook timestamp may drift from now, in seconds. Defaults to 300. */
+    toleranceSeconds?: number;
+    /** Current time in milliseconds since the epoch. Injectable for tests. */
+    now?: number;
+}
+
+/**
+ * Verifies that an incoming request is a genuine Woopy webhook (Standard Webhooks).
+ *
+ * @param rawBody The raw, unparsed request body - NOT the parsed object.
+ * @param headers The incoming request headers.
+ * @param secret Your application's webhook secret (`whsec_...`) from the dashboard.
+ * @throws {WoopyWebhookVerificationError} When the request is forged, tampered with, or replayed.
+ */
+export declare function verifyWebhook(
+    rawBody: string | Buffer | Uint8Array,
+    headers: Record<string, string | string[] | undefined> | Headers,
+    secret: string,
+    options?: VerifyWebhookOptions,
+): WoopyWebhookPayload;
+
+/**
  * The main Woopy client class for interacting with the API.
  */
 declare class Woopy {
