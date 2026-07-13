@@ -159,9 +159,24 @@ Verifies an incoming webhook and returns the parsed `WoopyWebhookPayload`. Throw
 | `delivery_id` | `string` | Unique id of this delivery. Use it as an idempotency key. |
 | `action_key` | `string` | The unique key of the triggered action. |
 | `title` | `string` | The action's title (its button label). |
-| `application_id` | `number` | ID of the application the action belongs to. |
-| `notification_id` | `number \| null` | ID of the alert the action was fired from, when applicable. |
+| `application_id` | `string` | UUID of the application the action belongs to. |
+| `notification_id` | `string \| null` | UUID of the alert the action was fired from, when applicable. |
 | `fired_at` | `string` | ISO 8601 timestamp of when the action was fired. |
+
+Every id in the payload is a UUID string. In `1.x`, `application_id` and `notification_id` were numbers - see the [changelog](CHANGELOG.md) if you are upgrading.
+
+A delivered payload looks like this:
+
+```json
+{
+  "delivery_id": "fde32757-0cde-4fc6-8dcc-57f69c9edc8c",
+  "action_key": "restart_workers",
+  "title": "Restart Workers",
+  "application_id": "666d605a-dd94-40b2-9b20-5c399299feae",
+  "notification_id": "381ddb5c-53a2-45df-886c-00c0da714b39",
+  "fired_at": "2026-07-13T09:20:00Z"
+}
+```
 
 ---
 

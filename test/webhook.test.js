@@ -15,19 +15,19 @@ const { verifyWebhook, WoopyWebhookVerificationError } = require("../webhook");
 // silently accepting nothing.
 const BACKEND = {
     secret: "whsec_d29vcHktZG9jLWZpeHR1cmUta2V5LTMyLWJ5dGVzISE=",
-    body: '{"delivery_id":"3f1c9b2e-8a44-4d1f-9c0e-77b2d5a61e30","action_key":"restart_workers","title":"Restart Workers","application_id":42,"notification_id":128,"fired_at":"2026-07-09T10:32:00Z"}',
+    body: '{"delivery_id":"f9ea5065-d359-4753-acf0-d48df8623e8e","action_key":"restart_workers","title":"Restart Workers","application_id":"5e27bbb3-410c-474a-bb75-9d2a65352c5f","notification_id":"1433e450-adcb-46f4-8747-c5a44d2efab5","fired_at":"2026-07-13T09:15:00Z"}',
     headers: {
-        "webhook-id": "3f1c9b2e-8a44-4d1f-9c0e-77b2d5a61e30",
-        "webhook-timestamp": "1783593120",
-        "webhook-signature": "v1,1pMj85mpF7SqQY5GS1GBCfRY4MkYGIg/lxuyoQ31IFY=",
+        "webhook-id": "f9ea5065-d359-4753-acf0-d48df8623e8e",
+        "webhook-timestamp": "1783934100",
+        "webhook-signature": "v1,sjmXt8AGgjaZrVXWAQryXQZCWfruLtbam0SS7nbDkuo=",
     },
     // The moment the fixture was signed, so the tolerance check sees a fresh request.
-    now: 1783593120 * 1000,
+    now: 1783934100 * 1000,
 };
 
 const SECRET = "whsec_" + Buffer.from("a".repeat(32)).toString("base64");
 const ID = "6a5c1a1e-2b64-4c3f-8c2d-9a1f0e5b7d21";
-const NOW = 1783593120 * 1000;
+const NOW = 1783934100 * 1000;
 
 // The npm implementation takes a Date and derives the unix timestamp itself,
 // where the Ruby one takes the string. Same signed string either way.
@@ -48,8 +48,21 @@ describe("verifyWebhook", () => {
         const payload = verifyWebhook(BACKEND.body, BACKEND.headers, BACKEND.secret, { now: BACKEND.now });
 
         assert.equal(payload.action_key, "restart_workers");
-        assert.equal(payload.delivery_id, "3f1c9b2e-8a44-4d1f-9c0e-77b2d5a61e30");
-        assert.equal(payload.notification_id, 128);
+        assert.equal(payload.delivery_id, "f9ea5065-d359-4753-acf0-d48df8623e8e");
+        assert.equal(payload.application_id, "5e27bbb3-410c-474a-bb75-9d2a65352c5f");
+        assert.equal(payload.notification_id, "1433e450-adcb-46f4-8747-c5a44d2efab5");
+    });
+
+    // Every id in a Woopy payload is a UUID string as of 2.0.0 - it used to be a
+    // number. Asserting the value alone would still pass if the backend ever went
+    // back to numbers and the fixture followed it; asserting the type is what
+    // pins down the contract this major version breaks.
+    test("carries every id as a string, not a number", () => {
+        const payload = verifyWebhook(BACKEND.body, BACKEND.headers, BACKEND.secret, { now: BACKEND.now });
+
+        assert.equal(typeof payload.delivery_id, "string");
+        assert.equal(typeof payload.application_id, "string");
+        assert.equal(typeof payload.notification_id, "string");
     });
 
     test("accepts a signature produced by another Standard Webhooks implementation", () => {
