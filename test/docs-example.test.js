@@ -46,18 +46,18 @@ const REQUEST = {
     secret: "whsec_d29vcHktZG9jLWZpeHR1cmUta2V5LTMyLWJ5dGVzISE=",
     // Express hands `express.raw()` a Buffer, which is exactly what arrives here.
     body: Buffer.from(
-        '{"delivery_id":"3f1c9b2e-8a44-4d1f-9c0e-77b2d5a61e30","action_key":"restart_workers","title":"Restart Workers","application_id":42,"notification_id":128,"fired_at":"2026-07-09T10:32:00Z"}',
+        '{"delivery_id":"fde32757-0cde-4fc6-8dcc-57f69c9edc8c","action_key":"restart_workers","title":"Restart Workers","application_id":"666d605a-dd94-40b2-9b20-5c399299feae","notification_id":"381ddb5c-53a2-45df-886c-00c0da714b39","fired_at":"2026-07-13T09:20:00Z"}',
         "utf8",
     ),
     headers: {
         "content-type": "application/json",
-        "webhook-id": "3f1c9b2e-8a44-4d1f-9c0e-77b2d5a61e30",
-        "webhook-timestamp": "1783593120",
-        "webhook-signature": "v1,1pMj85mpF7SqQY5GS1GBCfRY4MkYGIg/lxuyoQ31IFY=",
+        "webhook-id": "fde32757-0cde-4fc6-8dcc-57f69c9edc8c",
+        "webhook-timestamp": "1783934400",
+        "webhook-signature": "v1,aRPOUI2MCaENkJhJjHjyOkfE3eSzx2gMFjj7awMKmmU=",
     },
 };
 
-const SIGNED_AT_MS = 1783593120 * 1000;
+const SIGNED_AT_MS = 1783934400 * 1000;
 
 describe("the example published in the docs", () => {
     test("accepts a genuine request from the Woopy backend", () => {

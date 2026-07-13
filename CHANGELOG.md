@@ -5,6 +5,39 @@ All notable changes to `@woopysdk/node` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-07-13
+
+Woopy moved every identifier in its data model from a numeric id to a UUID. The
+ids in the webhook payload changed with it, so the published types had to change
+too. This is the only reason for the major bump.
+
+### Changed
+
+- **BREAKING (TypeScript):** in `WoopyWebhookPayload`, `application_id` is now
+  `string` (was `number`) and `notification_id` is now `string | null` (was
+  `number | null`). Both carry a UUID. `delivery_id` was already a `string` and
+  is unchanged.
+- **BREAKING (any language):** code that compares an id to a number - say
+  `payload.application_id === 42`, or a lookup in a table keyed by numeric id -
+  stops matching, silently. The values are now UUID strings such as
+  `"666d605a-dd94-40b2-9b20-5c399299feae"`. Nothing throws; the comparison just
+  never comes out true. Grep for the id fields before upgrading.
+
+### Not changed
+
+- `verifyWebhook` itself. It computes an HMAC over the raw bytes and ends at
+  `JSON.parse`, never touching a payload field, so signature verification,
+  replay protection and secret rotation behave exactly as in `1.2.0`. A handler
+  that only reads `action_key` and `delivery_id` can upgrade with no code change.
+- `Woopy`, `alert()` and every other export.
+
+### Who has to do something
+
+- Consumers of the TypeScript types: `tsc` will point at the comparisons and
+  assignments that no longer typecheck. That is the intended migration path.
+- Everyone else: only if you compare, store or route on `application_id` or
+  `notification_id`. If you do, treat them as opaque strings.
+
 ## [1.2.0] - 2026-07-09
 
 ### Added

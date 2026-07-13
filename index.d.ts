@@ -38,10 +38,10 @@ export interface WoopyWebhookPayload {
     action_key: string;
     /** The action's title (its button label) */
     title: string;
-    /** ID of the application the action belongs to */
-    application_id: number;
-    /** ID of the notification the action was fired from, or null when fired outside an alert */
-    notification_id: number | null;
+    /** UUID of the application the action belongs to */
+    application_id: string;
+    /** UUID of the notification the action was fired from, or null when fired outside an alert */
+    notification_id: string | null;
     /** ISO 8601 timestamp of when the action was fired */
     fired_at: string;
 }
