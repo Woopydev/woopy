@@ -5,6 +5,20 @@ All notable changes to `@woopysdk/node` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2026-07-13
+
+### Fixed
+
+- **`alert()` never worked.** It posted the alert fields as a flat body, while the
+  API expects them under a `notification` key - so every call made exactly as the
+  README shows came back `400 Bad Request` (`param is missing: notification`). The
+  client now does the wrapping, which is where it belongs: the caller passes the
+  fields, the SDK knows the wire format. Present since `1.0.0`; nobody hit it
+  because the package had no test for `alert()` at all - only for webhooks.
+- A payload that already carries a `notification` key is passed through unchanged,
+  so an integration that worked around this by wrapping the object by hand keeps
+  working.
+
 ## [2.0.0] - 2026-07-13
 
 Woopy moved every identifier in its data model from a numeric id to a UUID. The

@@ -13,13 +13,19 @@ class Woopy {
     }
 
     async alert(data = {}) {
+        // The API expects the alert under a `notification` key; a flat body is
+        // rejected with 400. Callers pass the fields directly - the wrapping is
+        // ours to do, not theirs to remember. A payload that already carries
+        // `notification` is passed through, so older integrations keep working.
+        const payload = "notification" in data ? data : { notification: data };
+
         const response = await fetch(`${this.baseUrl}/notifications`, {
             method: "POST",
             headers: {
                 "X-App-Token": `${this.token}`,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(payload)
         });
 
         if (!response.ok) {
