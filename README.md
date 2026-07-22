@@ -2,7 +2,7 @@
 
 Official Node.js library for the **Woopy API**. Send alerts and notifications to your system with ease and full TypeScript support.
 
-![Woopy demo: an app crashes, a push lands on the phone, one tap on Fire restarts the worker](https://woopy.dev/demo/demo.gif)
+![Woopy demo: an app crashes, a push lands on the phone, one tap on Fire restarts the worker](https://woopy.dev/demo/demo-readme.gif)
 
 Site: https://woopy.dev/
 
